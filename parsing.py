@@ -43,6 +43,9 @@ class Line:
         #     return False # First never useless
         return not any(map(lambda x: x[0] == InstructionType.ENTRY, self.instructions))
 
+    def link_entry_exit_points(self):
+        pass
+
     def get_next_instruction(self, line: str, i: int) -> Tuple[int, Instruction]:
             c = line[i]
             for x in SimpleInstructionType:
@@ -52,6 +55,9 @@ class Line:
                 return 1,(InstructionType.ENTRY,i)
             elif c in "^v<>":
                 return 1,(InstructionType.EXIT, (i, SYM_TO_DIR[c]))
+            elif c == "?":
+                di, inst = self.get_next_instruction(line, i+1)
+                return di + 1, (InstructionType.COND, inst)
             elif c == " ":
                 return 1,(InstructionType.NOOP, None)
             else:

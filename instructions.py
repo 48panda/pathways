@@ -10,6 +10,7 @@ class InstructionType(enum.Enum):
     SIMPLE = 1 # SimpleInstructionType
     ENTRY = 2 # int
     EXIT = 3 # int
+    COND = 4 # Instruction
     
     def __str__(self):
         return self.name
@@ -38,4 +39,4 @@ SimpleInstruction = Tuple[Literal[InstructionType.SIMPLE], SimpleInstructionType
 EntryPoint = Tuple[Literal[InstructionType.ENTRY], int]
 ExitPoint = Tuple[Literal[InstructionType.EXIT], Tuple[int, Direction]]
 
-Instruction = Union[NoOpInstruction,SimpleInstruction,EntryPoint,ExitPoint]
+Instruction = Union[NoOpInstruction,SimpleInstruction,EntryPoint,ExitPoint, (Cond:=Tuple[Literal[InstructionType.COND], "Instruction"])]
