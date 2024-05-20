@@ -12,3 +12,10 @@ J   F
 
 x = Parser(preprocess(Code(test_code)))
 print(x)
+
+# branch: parsing
+# Next steps:
+#  * Link entry and exit nodes
+#  * Create an ASG -- a graph where nodes = entry/exit points,
+#       and edges are groups of non-control-flow instructions
+# * Parsing branch complete!

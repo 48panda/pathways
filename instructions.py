@@ -1,6 +1,9 @@
 import enum
-from typing import List, Literal, Tuple, Union
+from typing import List, Literal, Tuple, Union, TYPE_CHECKING
 from util import Direction
+
+if TYPE_CHECKING:
+    from parsing import Line
 
 class InstructionType(enum.Enum):
     """Each instruction consists of a 2-element tuple, (type, data)
@@ -37,6 +40,6 @@ class SimpleInstructionType(enum.Enum):
 NoOpInstruction = Tuple[Literal[InstructionType.NOOP], Literal[None]]
 SimpleInstruction = Tuple[Literal[InstructionType.SIMPLE], SimpleInstructionType]
 EntryPoint = Tuple[Literal[InstructionType.ENTRY], int]
-ExitPoint = Tuple[Literal[InstructionType.EXIT], Tuple[int, Direction]]
+ExitPoint = Tuple[Literal[InstructionType.EXIT], Tuple[int, Direction] | "Line"]
 
 Instruction = Union[NoOpInstruction,SimpleInstruction,EntryPoint,ExitPoint, (Cond:=Tuple[Literal[InstructionType.COND], "Instruction"])]

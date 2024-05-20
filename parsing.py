@@ -32,6 +32,8 @@ class Line:
         i = 0
         while i < len(line):
             di, instruction = self.get_next_instruction(line, i)
+            if self.index == 0 and self.dir == Direction.UP:
+                print(instruction)
             i += di
             self.instructions.append(instruction)
     
@@ -48,13 +50,15 @@ class Line:
 
     def get_next_instruction(self, line: str, i: int) -> Tuple[int, Instruction]:
             c = line[i]
+            i_from_topleft = self.parser.width - (i + 1) if self.dir == Direction.LEFT else \
+                self.parser.height - (i + 1) if self.dir == Direction.UP else i
             for x in SimpleInstructionType:
                 if c == x.name:
                     return 1,(InstructionType.SIMPLE, x)
             if c == self.dir_symbol:
-                return 1,(InstructionType.ENTRY,i)
+                return 1,(InstructionType.ENTRY,i_from_topleft)
             elif c in "^v<>":
-                return 1,(InstructionType.EXIT, (i, SYM_TO_DIR[c]))
+                return 1,(InstructionType.EXIT, (i_from_topleft, SYM_TO_DIR[c]))
             elif c == "?":
                 di, inst = self.get_next_instruction(line, i+1)
                 return di + 1, (InstructionType.COND, inst)
@@ -72,6 +76,8 @@ class Parser:
     """Parses code into an ASG.
     """
     def __init__(self, code: Code):
+        self.width = code.width
+        self.height = code.height
         self.lines: "dict[Direction, dict[int, Line]]" = {i:{} for i in Direction}
         for i, row in enumerate(code.iter_rows()):
             self.lines[Direction.RIGHT][i] = Line(row, Direction.RIGHT, i, self)
@@ -91,3 +97,7 @@ class Parser:
     
     def __repr__(self):
         return repr(self.lines)
+    
+    def get_line_of_entry_point(self, dir: Direction, x: int, y: int):
+        if dir in (Direction.LEFT, Direction.RIGHT):
+            return self.lines[dir].get(x, None)
