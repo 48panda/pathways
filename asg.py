@@ -1,4 +1,4 @@
-from dis import Instruction
+from instructions import Instruction
 
 
 class ASGNode:
@@ -25,7 +25,7 @@ class ASGNode:
 class ASGEdge:
     """A graph edge. Represents the code run between two nodes.
     """
-    def __init__(self, src: ASGNode, dst: ASGNode, code:list[Instruction]):
+    def __init__(self, src: ASGNode, dst: ASGNode, code:"list[Instruction]"):
         self.src = src
         self.dst = dst
         self.code = code
