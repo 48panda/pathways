@@ -40,6 +40,6 @@ class SimpleInstructionType(enum.Enum):
 NoOpInstruction = Tuple[Literal[InstructionType.NOOP], Literal[None]]
 SimpleInstruction = Tuple[Literal[InstructionType.SIMPLE], SimpleInstructionType]
 EntryPoint = Tuple[Literal[InstructionType.ENTRY], int]
-ExitPoint = Tuple[Literal[InstructionType.EXIT], Tuple[int, Direction] | "Line"]
+ExitPoint = Tuple[Literal[InstructionType.EXIT], Tuple[int, Direction] | Tuple["Line", int]]
 
 Instruction = Union[NoOpInstruction,SimpleInstruction,EntryPoint,ExitPoint, (Cond:=Tuple[Literal[InstructionType.COND], "Instruction"])]

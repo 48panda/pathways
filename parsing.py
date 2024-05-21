@@ -46,7 +46,13 @@ class Line:
         return not any(map(lambda x: x[0] == InstructionType.ENTRY, self.instructions))
 
     def link_entry_exit_points(self):
-        pass
+        for i in range(len(self.instructions)):
+            if self.instructions[i][0] == InstructionType.EXIT:
+                if self.dir in (Direction.LEFT, Direction.RIGHT):
+                    new_exit_point_data = self.parser.get_line_of_entry_point(self.instructions[i][1][0], self.instructions[i][1][1], self.index)
+                else:
+                    new_exit_point_data = self.parser.get_line_of_entry_point(self.instructions[i][1][0], self.index, self.instructions[i][1][1])
+                self.instructions[i] = (InstructionType.EXIT, new_exit_point_data)
 
     def get_next_instruction(self, line: str, i: int) -> Tuple[int, Instruction]:
             c = line[i]
@@ -94,10 +100,16 @@ class Parser:
                     to_remove.append((d,k))
         for d,k in to_remove:
             del self.lines[d][k]
+
+        # Link entry/exit points
+        for d in Direction:
+            for k, v in self.lines[d].items():
+                v.link_entry_exit_points()
     
     def __repr__(self):
         return repr(self.lines)
     
-    def get_line_of_entry_point(self, dir: Direction, x: int, y: int):
+    def get_line_of_entry_point(self, dir: Direction, x: int, y: int) -> Tuple[Line | None, int]:
         if dir in (Direction.LEFT, Direction.RIGHT):
-            return self.lines[dir].get(x, None)
+            return self.lines[dir].get(y, None), x
+        return self.lines[dir].get(x, None), y
