@@ -49,9 +49,9 @@ class Line:
         for i in range(len(self.instructions)):
             if self.instructions[i][0] == InstructionType.EXIT:
                 if self.dir in (Direction.LEFT, Direction.RIGHT):
-                    new_exit_point_data = self.parser.get_line_of_entry_point(self.instructions[i][1][0], self.instructions[i][1][1], self.index)
+                    new_exit_point_data = self.parser.get_line_of_entry_point(self.instructions[i][1][1], self.instructions[i][1][0], self.index)
                 else:
-                    new_exit_point_data = self.parser.get_line_of_entry_point(self.instructions[i][1][0], self.index, self.instructions[i][1][1])
+                    new_exit_point_data = self.parser.get_line_of_entry_point(self.instructions[i][1][1], self.index, self.instructions[i][1][0])
                 self.instructions[i] = (InstructionType.EXIT, new_exit_point_data)
 
     def get_next_instruction(self, line: str, i: int) -> Tuple[int, Instruction]:
