@@ -21,6 +21,9 @@ class Line:
         self.dir_symbol = DIR_TO_SYMBOL[self.dir]
         self.parse(line)
         self.remove_noop()
+    
+    def __hash__(self):
+        return hash((self.index, self.dir))
 
     def parse(self, line:str):
         """Parses this line, by itself, into an InstructionGroup.
