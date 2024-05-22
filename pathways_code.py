@@ -67,3 +67,6 @@ class Code:
             typing.Iterable[str]: An iterable of columns, left to right.
         """
         return itertools.zip_longest(*self.code,fillvalue=" ")
+    
+    def __str__(self):
+        return "\n".join(self.code)
