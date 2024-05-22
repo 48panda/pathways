@@ -1,0 +1,32 @@
+name: Run Python test
+
+on:
+  workflow_call:
+    inputs:
+      file:
+        required: true
+        type: string
+      testname:
+        required: true
+        type: string
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: ${{inputs.testname}}
+    steps:
+      - uses: szenius/set-timezone@v2.0
+        with:
+          timezoneLinux: "Europe/London"
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: pip install pytest pytest-md pytest-emoji
+      - uses: pavelzw/pytest-action@v2
+        with:
+          emoji: true
+          verbose: false
+          job-summary: true
+          custom-arguments: ${{ inputs.config-path }}

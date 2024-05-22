@@ -84,5 +84,4 @@ def preprocess_comments(code: Code) -> Code:
     for c in comments:
         for x,y in c:
             code.set(x,y," ")
-    print(hcomments)
     return code
