@@ -31,30 +31,58 @@ def preprocess_comments(code: Code) -> Code:
     Returns:
         Code: _description_
     """
-    comments: "list[Box]" = []
-    for x in range(code.width):
-        for y in range(code.height): # Iterate through the code
+    hcomments: "list[Box]" = []
+    hfaults: int = 0 # Number of rows with odd hashtag
+    for y in range(code.height): # Iterate through the code
+        for x in range(code.width):
             if code.get(x,y) != "#": # We only care about comments here.
                 continue
-            if any(map(lambda z:(x,y) in z, comments)): # If in any of the comments, continue
-                continue
-            dx = 1 # Find the width of the comment if we choose horizontal.
+            if len(hcomments) > 0 and (x, y) in hcomments[-1]:
+                continue # End tag
+            dx = 1 # Find the width of the comment.
             while code.get(x + dx, y) != "#" and x + dx <= code.width:
                 dx += 1
             if x + dx > code.width:
-                dx = -1
-            dy = 1 # Find the height if we choose vertical.
+                hfaults += 1 # Fault found!
+                hcomments.append(Box(x, y, code.width, y))
+                break
+            hcomments.append(Box(x, y, x+dx, y))
+
+    vcomments: "list[Box]" = []
+    vfaults: int = 0 # Number of cols with odd hashtag
+    for x in range(code.width): # Iterate through the code
+        for y in range(code.height):
+            if code.get(x,y) != "#": # We only care about comments here.
+                continue
+            if len(vcomments) > 0 and (x, y) in vcomments[-1]:
+                continue # End tag
+            dy = 1 # Find the height of the comment.
             while code.get(x, y + dy) != "#" and y + dy <= code.height:
                 dy += 1
             if y + dy > code.height:
-                dx = -1
-            if dx > dy: # Choose the axis that will result in the largest comment.
-                comments.append(Box(x, y, x+dx, y))
-            elif dy > dx:
-                comments.append(Box(x, y, x, y+dy))
-            else:
-                raise ValueError("Equal comment gap!")
+                vfaults += 1 # Fault found!
+                vcomments.append(Box(x, y, x, code.height))
+                break
+            vcomments.append(Box(x, y, x, y + dy))
+    axis: int = 0 # 1 for vertical, 2 for horizontal
+    hchars = sum(map(len, hcomments))
+    vchars = sum(map(len, vcomments))
+    if hfaults > vfaults:
+        axis = 1
+    elif hfaults < vfaults:
+        axis = 2
+    elif hchars > vchars:
+        axis = 2
+    elif hchars < vchars:
+        axis = 1
+    else:
+        axis = 2
+    if axis == 1:
+        comments = vcomments
+    else:
+        comments = hcomments
     for c in comments:
-        for x,y in c.iter():
+        for x,y in c:
             code.set(x,y," ")
+    print(hcomments)
     return code
