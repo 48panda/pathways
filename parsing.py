@@ -164,6 +164,9 @@ class Parser:
                     if inst[0] == InstructionType.ENTRY:
                         graph.add_arrow_node(ASGArrowNode(d, *Parser.get_xy_from_indices(d, *inst[1])))
         
+        pseudostartnode = graph.get_arrow_node(Direction.RIGHT, 0, 0)
+        graph.add_edge(ASGEdge(graph.start, pseudostartnode, []))
+
         for d in Direction:
             for line in self.lines[d].values():
                 line.add_all_edges(graph)
