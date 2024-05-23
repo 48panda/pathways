@@ -30,3 +30,4 @@ jobs:
           verbose: false
           job-summary: true
           custom-arguments: ${{ inputs.config-path }}
+          custom-pytest: python -m pytest
