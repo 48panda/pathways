@@ -3,8 +3,8 @@ name: Test Preprocessing !!INCOMPLETE!!
 on: [push]
 
 jobs:
-  test-addition:
+  test-preprocessing:
     uses: ./.github/workflows/run_pytest.yaml
     with:
-      file: test_preprocessing.py
+      file: tests/test_preprocessing.py
       testname: Test Preprocessing
