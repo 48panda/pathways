@@ -1,3 +1,6 @@
+import enum
+
+
 class Box:
     """A utility class for 2d boxes of code (comments)
     """
@@ -29,3 +32,18 @@ class Box:
     
     def __iter__(self):
         return ((x,y) for y in range(self.y, self.y2+1) for x in range(self.x, self.x2+1))
+
+
+class Direction(enum.Enum):
+    UP = 0
+    DOWN = 1
+    LEFT = 2
+    RIGHT = 3
+    
+    def __str__(self):
+        return self.name
+    __repr__ = __str__
+
+
+DIR_TO_SYMBOL = {Direction.UP: "^", Direction.DOWN: "v", Direction.RIGHT: ">", Direction.LEFT: "<"}
+SYM_TO_DIR = {v:k for k,v in DIR_TO_SYMBOL.items()}
