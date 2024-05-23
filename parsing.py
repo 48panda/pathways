@@ -1,3 +1,4 @@
+from asg import ASG, ASGArrowNode, ASGDecisionNode, ASGEdge, ASGNode, EdgeType
 from util import Direction, DIR_TO_SYMBOL, SYM_TO_DIR
 from pathways_code import Code
 from instructions import InstructionType, SimpleInstructionType, Instruction
@@ -21,6 +22,7 @@ class Line:
         self.dir_symbol = DIR_TO_SYMBOL[self.dir]
         self.parse(line)
         self.remove_noop()
+        self.uncompound()
     
     def __hash__(self):
         return hash((self.index, self.dir))
@@ -35,39 +37,83 @@ class Line:
         i = 0
         while i < len(line):
             di, instruction = self.get_next_instruction(line, i)
-            if self.index == 0 and self.dir == Direction.UP:
-                print(instruction)
             i += di
             self.instructions.append(instruction)
     
+    def uncompound(self):
+        i = 0
+        while i < len(self.instructions):
+            inst = self.instructions[i]
+            if inst[0] == InstructionType.COND:
+                if inst[1][0] == InstructionType.COND:
+                    self.instructions[i] = inst[1]
+                    self.instructions.insert(i, (InstructionType.SIMPLE, SimpleInstructionType.AND))
+            i += 1
+
     def remove_noop(self):
         self.instructions = list(filter(lambda x:x[0]!=InstructionType.NOOP,self.instructions))
+
+    def add_all_edges(self, graph: ASG):
+        i = 0
+        curr_node = None
+        next_type = None
+        code = []
+        while i < len(self.instructions):
+            inst = self.instructions[i]
+            if curr_node is None and inst[0] != InstructionType.ENTRY:
+                continue
+            if curr_node is None:
+                curr_node = graph.get_arrow_node(self.dir, *inst[1])
+                next_type = EdgeType.ALWAYS
+            else:
+                if inst[0] == InstructionType.EXIT:
+                    dst = graph.get_arrow_node(inst[1][1],*inst[1][0])
+                    graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
+                    code = []
+                    curr_node = None
+                    next_type = None
+                elif inst[0] == InstructionType.COND and inst[1][0] == InstructionType.EXIT:
+                    graph.add_decision_node(mid := ASGDecisionNode())
+                    graph.add_edge(ASGEdge(curr_node, mid, code, next_type))
+                    dst = graph.get_arrow_node(inst[1][1][1],*inst[1][1][0])
+                    graph.add_edge(ASGEdge(mid, dst, [], EdgeType.TRUE))
+                    code = []
+                    curr_node = mid
+                    next_type = EdgeType.FALSE
+                else:
+                    code.append(inst)
+            i += 1
+        if curr_node is not None:
+            graph.add_edge(ASGEdge(curr_node, graph.terminal, code, next_type))
     
     def is_useless(self):
         # if self.dir == Direction.RIGHT and self.index == 0:
         #     return False # First never useless
         return not any(map(lambda x: x[0] == InstructionType.ENTRY, self.instructions))
 
-    def link_entry_exit_points(self):
-        for i in range(len(self.instructions)):
-            if self.instructions[i][0] == InstructionType.EXIT:
-                if self.dir in (Direction.LEFT, Direction.RIGHT):
-                    new_exit_point_data = self.parser.get_line_of_entry_point(self.instructions[i][1][1], self.instructions[i][1][0], self.index)
-                else:
-                    new_exit_point_data = self.parser.get_line_of_entry_point(self.instructions[i][1][1], self.index, self.instructions[i][1][0])
-                self.instructions[i] = (InstructionType.EXIT, new_exit_point_data)
-
     def get_next_instruction(self, line: str, i: int) -> Tuple[int, Instruction]:
+            if not (0 <= i < len(line)):
+                return 0,(InstructionType.NOOP, None)
             c = line[i]
-            i_from_topleft = self.parser.width - (i + 1) if self.dir == Direction.LEFT else \
-                self.parser.height - (i + 1) if self.dir == Direction.UP else i
+            if self.dir == Direction.LEFT:
+                X = self.parser.width - (i + 1)
+                Y = self.index
+            elif self.dir == Direction.UP:
+                X = self.index
+                Y = self.parser.height - (i + 1)
+            elif self.dir == Direction.RIGHT:
+                X = i
+                Y = self.index
+            else:
+                X = self.index
+                Y = i
             for x in SimpleInstructionType:
                 if c == x.name:
                     return 1,(InstructionType.SIMPLE, x)
             if c == self.dir_symbol:
-                return 1,(InstructionType.ENTRY,i_from_topleft)
+                return 1,(InstructionType.ENTRY,(X,Y))
             elif c in "^v<>":
-                return 1,(InstructionType.EXIT, (i_from_topleft, SYM_TO_DIR[c]))
+                return 1,(InstructionType.EXIT, ((X,Y), SYM_TO_DIR[c]))
             elif c == "?":
                 di, inst = self.get_next_instruction(line, i+1)
                 return di + 1, (InstructionType.COND, inst)
@@ -104,15 +150,24 @@ class Parser:
         for d,k in to_remove:
             del self.lines[d][k]
 
-        # Link entry/exit points
+    @staticmethod
+    def get_xy_from_indices(dir: Direction, rowcolindx: int, lineindx: int) -> Tuple[int, int]:
+        if dir in (Direction.LEFT, Direction.RIGHT):
+            return (lineindx, rowcolindx)
+        return (rowcolindx, lineindx)
+
+    def get_graph(self):
+        graph: ASG = ASG()
         for d in Direction:
-            for k, v in self.lines[d].items():
-                v.link_entry_exit_points()
-    
+            for i, v in self.lines[d].items():
+                for inst in v.instructions:
+                    if inst[0] == InstructionType.ENTRY:
+                        graph.add_arrow_node(ASGArrowNode(d, *Parser.get_xy_from_indices(d, *inst[1])))
+        
+        for d in Direction:
+            for line in self.lines[d].values():
+                line.add_all_edges(graph)
+        return graph
+
     def __repr__(self):
         return repr(self.lines)
-    
-    def get_line_of_entry_point(self, dir: Direction, x: int, y: int) -> Tuple[Line | None, int]:
-        if dir in (Direction.LEFT, Direction.RIGHT):
-            return self.lines[dir].get(y, None), x
-        return self.lines[dir].get(x, None), y
