@@ -21,6 +21,9 @@ class Box:
     def __str__(self):
         return f"<{self.x},{self.y},{self.x2},{self.y2}>"
     
+    def __len__(self):
+        return (self.x2 - self.x + 1) * (self.y2 - self.y + 1)
+    
     def __contains__(self, other):
         return self.x <= other[0] <= self.x2 and self.y <= other[1] <= self.y2
     
