@@ -96,11 +96,11 @@ class Line:
                 return 0,(InstructionType.NOOP, None)
             c = line[i]
             if self.dir == Direction.LEFT:
-                X = self.parser.width - (i + 1)
+                X = len(line) - (i + 1)
                 Y = self.index
             elif self.dir == Direction.UP:
                 X = self.index
-                Y = self.parser.height - (i + 1)
+                Y = len(line) - (i + 1)
             elif self.dir == Direction.RIGHT:
                 X = i
                 Y = self.index
