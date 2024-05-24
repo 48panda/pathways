@@ -13,6 +13,7 @@ class ASGNode:
         self.indeg: int = 0
         self.outdeg: int = 0
         self.is_visited: bool = False
+        self.outlim: int = 1
 
     def add_in_edge(self, edge: "ASGEdge") -> None:
         self.in_edges.append(edge)
@@ -23,6 +24,8 @@ class ASGNode:
         self.out_edges.append(edge)
         self.deg += 1
         self.outdeg += 1
+        if self.outdeg > self.outlim:
+            raise ValueError("Too many out nodes.")
 
 class ASGTerminalNode(ASGNode):
     def __init__(self):
@@ -60,6 +63,20 @@ class ASGDecisionNode(ASGNode):
         self.name = dcount
         self.group = 1
         self.value = 10
+        self.outlim = 2
+        self.true = None
+        self.false = None
+
+    def add_out_edge(self, edge: "ASGEdge") -> None:
+        super().add_out_edge(edge)
+        if edge.type == EdgeType.TRUE:
+            if self.true is not None:
+                raise ValueError(f"{self.id()} already has a true node")
+            self.true = edge
+        if edge.type == EdgeType.FALSE:
+            if self.false is not None:
+                raise ValueError(f"{self.id()} already has a false node")
+            self.false = edge
 
     def id(self):
         return f"D{self.name}"
@@ -91,9 +108,9 @@ class ASGEdge:
         self.src = src
         self.dst = dst
         self.code = code
+        self.type = type
         src.add_out_edge(self)
         dst.add_in_edge(self)
-        self.type = type
     
     def get_pyvis_edge_data(self):
         return (self.src.id(), self.dst.id())
