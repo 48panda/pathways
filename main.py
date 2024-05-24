@@ -10,7 +10,6 @@ test_code = """\
 H    D
 G    ?
 ^?F E<
-
 """
 
 parser = Parser(preprocess(Code(test_code)))
