@@ -5,12 +5,12 @@ from preprocessing import preprocess
 from interpreter import Interpreter
 
 test_code = """\
->TT!?v
-?    T
-!    F
-F    !
-T    ?
-^?!TF<
+>TT! ?v
+?     T
+!     F
+F     !
+T     ?
+^?!T F<
 """
 
 parser = Parser(preprocess(Code(test_code)))
