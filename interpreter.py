@@ -1,3 +1,4 @@
+from sre_constants import IN
 from asg import ASG, ASGArrowNode, ASGDecisionNode, ASGNode, ASGStartNode, ASGTerminalNode
 from instructions import Instruction, InstructionType, SimpleInstructionType
 
@@ -32,6 +33,8 @@ class Interpreter:
     def run_instruction(self, inst: Instruction):
         if inst[0] == InstructionType.SIMPLE:
             self.run_simple_instruction(inst[1])
+        elif inst[0] == InstructionType.INTEGER:
+            self.push(inst[1])
         else:
             raise ValueError(f"Unknown instruction type '{inst}'")
     
@@ -44,12 +47,48 @@ class Interpreter:
             a = self.pop()
             b = self.pop()
             self.push(a or b)
+        elif inst == SimpleInstructionType.ADD:
+            a = self.pop()
+            b = self.pop()
+            self.push(b + a)
+        elif inst == SimpleInstructionType.SUB:
+            a = self.pop()
+            b = self.pop()
+            self.push(b - a)
+        elif inst == SimpleInstructionType.MUL:
+            a = self.pop()
+            b = self.pop()
+            self.push(b * a)
+        elif inst == SimpleInstructionType.DIV:
+            a = self.pop()
+            b = self.pop()
+            self.push(b // a)
         elif inst == SimpleInstructionType.TRUE:
             self.push(True)
         elif inst == SimpleInstructionType.FALSE:
             self.push(False)
         elif inst == SimpleInstructionType.PRINT:
             print(self.pop())
+        elif inst == SimpleInstructionType.N0:
+            self.push(0)
+        elif inst == SimpleInstructionType.N1:
+            self.push(1)
+        elif inst == SimpleInstructionType.N2:
+            self.push(2)
+        elif inst == SimpleInstructionType.N3:
+            self.push(3)
+        elif inst == SimpleInstructionType.N4:
+            self.push(4)
+        elif inst == SimpleInstructionType.N5:
+            self.push(5)
+        elif inst == SimpleInstructionType.N6:
+            self.push(6)
+        elif inst == SimpleInstructionType.N7:
+            self.push(7)
+        elif inst == SimpleInstructionType.N8:
+            self.push(8)
+        elif inst == SimpleInstructionType.N9:
+            self.push(9)
         else:
             raise ValueError(f"Unknown simple instruction '{inst}'")
 
