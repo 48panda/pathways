@@ -2,16 +2,18 @@ from optimise_graph import Optimiser
 from pathways_code import Code
 from parsing import Parser
 from preprocessing import preprocess
+from interpreter import Interpreter
 
 test_code = """\
->AB?v
-?   C
-H   D
-G   ?
-^?FE<
+>n12?v
+?    CA
+H    D
+G    ?
+^?F E<
 """
 
 parser = Parser(preprocess(Code(test_code)))
 graph = parser.get_graph()
 graph = Optimiser(graph).optimise()
-graph.show()
+Interpreter(graph).start_interpreting()
+# graph.show()

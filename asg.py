@@ -130,7 +130,7 @@ class ASG:
         self.edges: List[ASGEdge] = []
         self.nodes: List[ASGNode] = []
         self.terminal: ASGTerminalNode = ASGTerminalNode()
-        self.start: ASGTerminalNode = ASGStartNode()
+        self.start: ASGStartNode = ASGStartNode()
 
     def add_arrow_node(self, node: ASGArrowNode) -> None:
         self.arrow_nodes[(node.dir, node.x, node.y)] = node
