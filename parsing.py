@@ -108,7 +108,7 @@ class Line:
                 X = self.index
                 Y = i
             for x in SimpleInstructionType:
-                if c == x.name:
+                if c == x.value:
                     return 1,(InstructionType.SIMPLE, x)
             if c == self.dir_symbol:
                 return 1,(InstructionType.ENTRY,(X,Y))
@@ -120,7 +120,7 @@ class Line:
             elif c == " ":
                 return 1,(InstructionType.NOOP, None)
             else:
-                raise ValueError
+                raise ValueError(f"Unknown instruction '{c}'")
     
     def __repr__(self):
         return repr(self.instructions) + "\n"

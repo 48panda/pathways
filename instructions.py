@@ -20,19 +20,11 @@ class InstructionType(enum.Enum):
     __repr__ = __str__
 
 class SimpleInstructionType(enum.Enum):
-    A = "A"
-    B = "B"
-    C = "C"
-    D = "D"
-    E = "E"
-    F = "F"
-    G = "G"
-    H = "H"
-    I = "I"
-    J = "J"
-    K = "K"
-    L = "L"
     AND = "&"
+    OR = "|"
+    TRUE = "T"
+    FALSE = "F"
+    PRINT = "!"
     
     def __str__(self):
         return self.value
