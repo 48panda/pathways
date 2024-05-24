@@ -13,47 +13,79 @@ class ASGNode:
         self.indeg: int = 0
         self.outdeg: int = 0
         self.is_visited: bool = False
-    
+        self.outlim: int = 1
+
     def add_in_edge(self, edge: "ASGEdge") -> None:
         self.in_edges.append(edge)
         self.deg += 1
         self.indeg += 1
+
+    def add_out_edge(self, edge: "ASGEdge") -> None:
+        self.out_edges.append(edge)
+        self.deg += 1
+        self.outdeg += 1
+        if self.outdeg > self.outlim:
+            raise ValueError("Too many out nodes.")
 
 class ASGTerminalNode(ASGNode):
     def __init__(self):
         ASGNode.__init__(self)
         self.value = 15
         self.group = 2
+    
+    def add_out_edge(self, edge: "ASGEdge") -> None:
+        raise TypeError("Terminal Node may not have outgoing edges")
+
     def id(self):
         return "T"
 
-class ASGNonTerminalNode(ASGNode):
-    """A graph node. Represents both direction changes and decision branches.
-    """    
-    def add_out_edge(self, edge: "ASGEdge") -> None:
-        self.out_edges.append(edge)
-        self.deg += 1
-        self.outdeg += 1
+class ASGStartNode(ASGNode):
+    def __init__(self):
+        ASGNode.__init__(self)
+        self.value = 15
+        self.group = 3
+    
+    def add_in_edge(self, edge: "ASGEdge") -> None:
+        raise TypeError("Start Node may not have incoming edges")
+
+    def id(self):
+        return "S"
+
+
 dcount = 0
-class ASGDecisionNode(ASGNonTerminalNode):
+class ASGDecisionNode(ASGNode):
     """A graph node. Represents decision branches.
     """
     def __init__(self) -> None:
-        ASGNonTerminalNode.__init__(self)
+        ASGNode.__init__(self)
         global dcount
         dcount += 1
         self.name = dcount
         self.group = 1
         self.value = 10
+        self.outlim = 2
+        self.true = None
+        self.false = None
+
+    def add_out_edge(self, edge: "ASGEdge") -> None:
+        super().add_out_edge(edge)
+        if edge.type == EdgeType.TRUE:
+            if self.true is not None:
+                raise ValueError(f"{self.id()} already has a true node")
+            self.true = edge
+        if edge.type == EdgeType.FALSE:
+            if self.false is not None:
+                raise ValueError(f"{self.id()} already has a false node")
+            self.false = edge
 
     def id(self):
         return f"D{self.name}"
 
-class ASGArrowNode(ASGNonTerminalNode):
+class ASGArrowNode(ASGNode):
     """A graph node. Represents direction changes.
     """
     def __init__(self, dir, x, y) -> None:
-        ASGNonTerminalNode.__init__(self)
+        ASGNode.__init__(self)
         self.dir: Direction = dir
         self.x: int = x
         self.y: int = y
@@ -76,9 +108,9 @@ class ASGEdge:
         self.src = src
         self.dst = dst
         self.code = code
+        self.type = type
         src.add_out_edge(self)
         dst.add_in_edge(self)
-        self.type = type
     
     def get_pyvis_edge_data(self):
         return (self.src.id(), self.dst.id())
@@ -98,6 +130,7 @@ class ASG:
         self.edges: List[ASGEdge] = []
         self.nodes: List[ASGNode] = []
         self.terminal: ASGTerminalNode = ASGTerminalNode()
+        self.start: ASGStartNode = ASGStartNode()
 
     def add_arrow_node(self, node: ASGArrowNode) -> None:
         self.arrow_nodes[(node.dir, node.x, node.y)] = node
@@ -117,7 +150,7 @@ class ASG:
     def show(self, filename: str = "graph.html"):
         from pyvis.network import Network
         net = Network(directed=True)
-        for node in self.nodes + [self.terminal]:
+        for node in self.nodes + [self.terminal, self.start]:
             net.add_node(node.id(), value=node.value, group=node.group)
         for edge in self.edges:
             net.add_edge(*edge.get_pyvis_edge_data(), label=stringify_instrs(edge.code), color=edge.get_color())
