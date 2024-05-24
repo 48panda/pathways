@@ -179,7 +179,9 @@ class Parser:
             for i, v in self.lines[d].items():
                 for inst in v.instructions:
                     if inst[0] == InstructionType.ENTRY:
-                        graph.add_arrow_node(ASGArrowNode(d, *inst[1]))
+                        graph.add_arrow_node(ASGArrowNode(d, *inst[1]))                    
+                    if inst[0] == InstructionType.COND and inst[1][0] == InstructionType.ENTRY:
+                        graph.add_arrow_node(ASGArrowNode(d,*inst[1][1]))
 
         for d in Direction:
             for line in self.lines[d].values():
