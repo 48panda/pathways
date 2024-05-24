@@ -4,11 +4,11 @@ from parsing import Parser
 from preprocessing import preprocess
 
 test_code = """\
->AB?v
-?   C
-H   D
-G   ?
-^?FE<
+>AB ?v
+?    C
+H    D
+G    ?
+^?F E<
 """
 
 parser = Parser(preprocess(Code(test_code)))
