@@ -43,6 +43,18 @@ class ASGNode:
         self.indeg = len(self.in_edges)
         self.outdeg = len(self.out_edges)
         self.deg = self.indeg + self.outdeg
+    
+    def visit(self) -> None:
+        if not self.is_visited:
+            self.is_visited = True
+            for edge in self.out_edges:
+                edge.dst.visit()
+    
+    def remove(self, graph: "ASG"):
+        for edge in self.in_edges + self.out_edges:
+            edge.disconnect()
+            graph.remove_edge(edge)
+        graph.remove_node(self)
 
 class ASGTerminalNode(ASGNode):
     def __init__(self):
@@ -201,9 +213,19 @@ class ASG:
     def show(self, filename: str = "graph.html"):
         from pyvis.network import Network
         net = Network(directed=True)
+        net.add_node("X1", group=0, hidden=True, physics = False)
+        net.add_node("X2", group=1, hidden=True, physics = False)
+        net.add_node("X3", group=2, hidden=True, physics = False)
+        net.add_node("X4", group=3, hidden=True, physics = False)
         for node in self.nodes + [self.terminal, self.start]:
             net.add_node(node.id(), value=node.value, group=node.group)
         for edge in self.edges:
             net.add_edge(*edge.get_pyvis_edge_data(), label=stringify_instrs(edge.code), color=edge.get_color())
         net.set_edge_smooth("dynamic")
         net.show(filename, notebook=False)
+    
+    def set_visited(self, visited: bool = False):
+        """Sets the visited status for all nodes in the graph to the boolean.
+        """
+        for node in self.nodes:
+            node.is_visited = False

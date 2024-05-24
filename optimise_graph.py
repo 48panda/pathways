@@ -6,6 +6,7 @@ class Optimiser:
         self.graph = graph
     
     def optimise(self) -> ASG:
+        self.remove_unreachable()
         self.remove_boring_nodes()
         return self.graph
     
@@ -24,3 +25,11 @@ class Optimiser:
                 self.graph.add_edge(in_edge + out_edge)
             else:
                 i += 1
+    
+    def remove_unreachable(self):
+        self.graph.set_visited()
+        self.graph.start.visit()
+        for node in self.graph.nodes:
+            if not node.is_visited:
+                # Unreachable
+                node.remove(self.graph)

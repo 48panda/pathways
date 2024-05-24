@@ -6,9 +6,9 @@ from preprocessing import preprocess
 test_code = """\
 >AB?v
 ?   ?
-H   v
+<   v
 G   ?
-^?FE<
+^?^E<
 """
 
 parser = Parser(preprocess(Code(test_code)))
