@@ -55,3 +55,4 @@ def stringify_instrs(instructions: List[Instruction]) -> str:
 def stringify_instr(i: Instruction) -> str:
     if i[0] == InstructionType.SIMPLE:
         return str(i[1])
+    return str(i)

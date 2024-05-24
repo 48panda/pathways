@@ -61,6 +61,7 @@ class Line:
         while i < len(self.instructions):
             inst = self.instructions[i]
             if curr_node is None and inst[0] != InstructionType.ENTRY:
+                i += 1
                 continue
             if curr_node is None:
                 curr_node = graph.get_arrow_node(self.dir, *inst[1])
@@ -80,6 +81,18 @@ class Line:
                     code = []
                     curr_node = mid
                     next_type = EdgeType.FALSE
+                elif inst[0] == InstructionType.ENTRY:
+                    dst = graph.get_arrow_node(self.dir,*inst[1])
+                    graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
+                    code = []
+                    curr_node = dst
+                    next_type = EdgeType.ALWAYS
+                elif inst[0] == InstructionType.COND and inst[1][0] == InstructionType.ENTRY:
+                    dst = graph.get_arrow_node(self.dir,*inst[1][1])
+                    graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
+                    code = []
+                    curr_node = dst
+                    next_type = EdgeType.ALWAYS
                 else:
                     code.append(inst)
             i += 1
@@ -163,6 +176,9 @@ class Parser:
                 for inst in v.instructions:
                     if inst[0] == InstructionType.ENTRY:
                         graph.add_arrow_node(ASGArrowNode(d, *Parser.get_xy_from_indices(d, *inst[1])))
+                    if inst[0] == InstructionType.COND and inst[1][0] == InstructionType.ENTRY:
+                        graph.add_arrow_node(ASGArrowNode(d, *Parser.get_xy_from_indices(d, *inst[1][1])))
+
         
         pseudostartnode = graph.get_arrow_node(Direction.RIGHT, 0, 0)
         graph.add_edge(ASGEdge(graph.start, pseudostartnode, []))

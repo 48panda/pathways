@@ -5,8 +5,8 @@ from preprocessing import preprocess
 
 test_code = """\
 >AB?v
-?   C
-H   D
+?   ?
+H   v
 G   ?
 ^?FE<
 """
