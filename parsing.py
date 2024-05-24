@@ -58,9 +58,13 @@ class Line:
         curr_node = None
         next_type = None
         code = []
+        if self.index == 0 and self.dir == Direction.RIGHT:
+            curr_node = graph.start
+            next_type = EdgeType.ALWAYS
         while i < len(self.instructions):
             inst = self.instructions[i]
             if curr_node is None and inst[0] != InstructionType.ENTRY:
+                i += 1
                 continue
             if curr_node is None:
                 curr_node = graph.get_arrow_node(self.dir, *inst[1])
@@ -87,8 +91,8 @@ class Line:
             graph.add_edge(ASGEdge(curr_node, graph.terminal, code, next_type))
     
     def is_useless(self):
-        # if self.dir == Direction.RIGHT and self.index == 0:
-        #     return False # First never useless
+        if self.dir == Direction.RIGHT and self.index == 0:
+            return False # First never useless
         return not any(map(lambda x: x[0] == InstructionType.ENTRY, self.instructions))
 
     def get_next_instruction(self, line: str, i: int) -> Tuple[int, Instruction]:
@@ -108,7 +112,7 @@ class Line:
                 X = self.index
                 Y = i
             for x in SimpleInstructionType:
-                if c == x.name:
+                if c == x.value:
                     return 1,(InstructionType.SIMPLE, x)
             if c == self.dir_symbol:
                 return 1,(InstructionType.ENTRY,(X,Y))
@@ -119,8 +123,21 @@ class Line:
                 return di + 1, (InstructionType.COND, inst)
             elif c == " ":
                 return 1,(InstructionType.NOOP, None)
+            elif c in "nN":
+                di = 1
+                c2 = "0"
+                num = 0
+                while c2 in "0123456789":
+                    num *= 10
+                    num += int(c2)
+                    if  i + di < len(line):
+                        c2 = line[i + di]
+                    else:
+                        c2 = " "
+                    di += 1
+                return di-1, (InstructionType.INTEGER, num if c == "n" else -num)
             else:
-                raise ValueError
+                raise ValueError(f"Unknown instruction '{c}'")
     
     def __repr__(self):
         return repr(self.instructions) + "\n"
@@ -163,9 +180,6 @@ class Parser:
                 for inst in v.instructions:
                     if inst[0] == InstructionType.ENTRY:
                         graph.add_arrow_node(ASGArrowNode(d, *inst[1]))
-        
-        pseudostartnode = graph.get_arrow_node(Direction.RIGHT, 0, 0)
-        graph.add_edge(ASGEdge(graph.start, pseudostartnode, []))
 
         for d in Direction:
             for line in self.lines[d].values():
