@@ -14,7 +14,7 @@ def preprocess(code: Code) -> Code:
     Returns:
         Code: The same code. Guaranteed to be a reference to the input 'code' parameter.
     """
-    return preprocess_comments(code)
+    return code
 
 def preprocess_comments(code: Code) -> Code:
     """Removes all comments from the code.
@@ -84,5 +84,4 @@ def preprocess_comments(code: Code) -> Code:
     for c in comments:
         for x,y in c:
             code.set(x,y," ")
-    print(hcomments)
     return code

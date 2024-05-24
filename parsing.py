@@ -112,6 +112,8 @@ class Line:
                     return 1,(InstructionType.SIMPLE, x)
             if c == self.dir_symbol:
                 return 1,(InstructionType.ENTRY,(X,Y))
+            if c == "#":
+                return 2, (InstructionType.NOOP, None) # Skip the next character too.
             elif c in "^v<>":
                 return 1,(InstructionType.EXIT, ((X,Y), SYM_TO_DIR[c]))
             elif c == "?":
