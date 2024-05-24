@@ -29,3 +29,33 @@ A 2d esoteric programming language
 * `*`: Pops `a`, `b` from the stack. pushes `a * b`
 * `/`: Pops `a`, `b` from the stack. pushes `b / a`
 * `0`, `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `9`: Pushes the respective integer to the stack.
+* `d`: Pops from the stack. Pushes the value on twice.
+* `=`: Pops `a`, `b` from the stack. pushes `a == b`
+* `~`: pops `a` from the stack. If `a` is a boolean, pushes `not a`. If `a` is a number, returns `-a`. If `a` is a string, returns `a[::-1]`. Otherwise, pushes the value back unchanged
+
+All characters:
+
+```¬!"£$%^&*()_-+={}[]:;@'~#|\<>,.?/``
+
+Currently in use:
+`!^&*-+~#|<>?/`
+
+Planned deprecations:
+`#`
+
+Currently not in use:
+```¬"£$%()_={}[]:;@'\.,``
+
+Planned to implement:
+
+`%` for mod arithmetic
+`"` for strings
+`'` for characters
+`=` for equals
+`@` for **exciting new feature**
+`UNKNOWN` for user input (could also use a letter)
+`#` for escaping arrows (for 2-directional code) 
+`.,` for secondary stack
+
+Planned to not be in use:
+```¬£$()_{}[]:;``

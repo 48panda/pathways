@@ -5,8 +5,7 @@ from preprocessing import preprocess
 from interpreter import Interpreter
 
 test_code = """\
-n12!v
-!43N<
+N234d!!
 """
 
 parser = Parser(preprocess(Code(test_code)))

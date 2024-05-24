@@ -69,6 +69,20 @@ class Interpreter:
             self.push(False)
         elif inst == SimpleInstructionType.PRINT:
             print(self.pop())
+        elif inst == SimpleInstructionType.DUPLICATE:
+            val = self.pop()
+            self.push(val)
+            self.push(val)
+        elif inst == SimpleInstructionType.NEGATE:
+            val = self.pop()
+            if isinstance(val, bool):
+                self.push(not val)
+            elif isinstance(val, int):
+                self.push(-val)
+            elif isinstance(val, str):
+                self.push(val[::-1])
+            else:
+                self.push(val)
         elif inst == SimpleInstructionType.N0:
             self.push(0)
         elif inst == SimpleInstructionType.N1:

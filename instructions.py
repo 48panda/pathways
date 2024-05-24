@@ -30,6 +30,8 @@ class SimpleInstructionType(enum.Enum):
     FALSE = "F"
     TRUE = "T"
     PRINT = "!"
+    DUPLICATE = "d"
+    NEGATE = "~"
     N0 = "0"
     N1 = "1"
     N2 = "2"
@@ -63,4 +65,4 @@ def stringify_instr(i: Instruction) -> str:
     if i[0] == InstructionType.SIMPLE:
         return str(i[1])
     if i[0] == InstructionType.INTEGER:
-        return f"{'n' if i[1]>0 else 'N'}{i[1]}"
+        return f"{'n' if i[1]>0 else 'N'}{abs(i[1])}"
