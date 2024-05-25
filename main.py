@@ -5,11 +5,8 @@ from preprocessing import preprocess
 from interpreter import Interpreter
 
 test_code = """\
->AB?v
-?   ?
-<   v
-G   ?
-^?^E<
+n12 5+!
+"""
 
 parser = Parser(preprocess(Code(test_code)))
 graph = parser.get_graph()
