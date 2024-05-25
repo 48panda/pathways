@@ -33,8 +33,11 @@ class Interpreter:
     def run_instruction(self, inst: Instruction):
         if inst[0] == InstructionType.SIMPLE:
             self.run_simple_instruction(inst[1])
-        elif inst[0] == InstructionType.INTEGER:
+        elif inst[0] in (InstructionType.INTEGER, InstructionType.STRING):
             self.push(inst[1])
+        elif inst[0] == InstructionType.COND:
+            if self.pop():
+                self.run_instruction(inst[1])
         else:
             raise ValueError(f"Unknown instruction type '{inst}'")
     
@@ -63,6 +66,33 @@ class Interpreter:
             a = self.pop()
             b = self.pop()
             self.push(b // a)
+        elif inst == SimpleInstructionType.MOD:
+            a = self.pop()
+            b = self.pop()
+            self.push(b % a)
+        elif inst == SimpleInstructionType.EQUAL:
+            a = self.pop()
+            b = self.pop()
+            self.push(b == a)
+        elif inst == SimpleInstructionType.LESS:
+            a = self.pop()
+            b = self.pop()
+            self.push(b < a)
+        elif inst == SimpleInstructionType.GREATER:
+            a = self.pop()
+            b = self.pop()
+            self.push(b > a)
+        elif inst == SimpleInstructionType.NEGATE:
+            a = self.pop()
+            if type(a) == bool:
+                self.push(not a)
+            elif type(a) == int:
+                self.push(-a)
+            elif type(a) == str:
+                self.push(a[::-1])
+            else:
+                self.push(a)
+
         elif inst == SimpleInstructionType.TRUE:
             self.push(True)
         elif inst == SimpleInstructionType.FALSE:
