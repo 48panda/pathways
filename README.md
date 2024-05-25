@@ -52,7 +52,7 @@ Escape code | Resulting character
 
 All characters:
 
-```¬!"£$%^&*()_-+={}[]:;@'~#|\<>,.?/``
+`` `¬!"£$%^&*()_-+={}[]:;@'~#|\<>,.?/ ``
 
 Currently in use:
 `!^&*-+~|<>?/`
