@@ -5,7 +5,11 @@ from preprocessing import preprocess
 from interpreter import Interpreter
 
 test_code = """\
-N234d!!
+>n12?v
+?    CA
+H    D
+G    ?
+^?F E<
 """
 
 parser = Parser(preprocess(Code(test_code)))

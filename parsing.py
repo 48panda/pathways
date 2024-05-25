@@ -100,11 +100,11 @@ class Line:
                 return 0,(InstructionType.NOOP, None)
             c = line[i]
             if self.dir == Direction.LEFT:
-                X = self.parser.width - (i + 1)
+                X = len(line) - (i + 1)
                 Y = self.index
             elif self.dir == Direction.UP:
                 X = self.index
-                Y = self.parser.height - (i + 1)
+                Y = len(line) - (i + 1)
             elif self.dir == Direction.RIGHT:
                 X = i
                 Y = self.index
@@ -116,6 +116,8 @@ class Line:
                     return 1,(InstructionType.SIMPLE, x)
             if c == self.dir_symbol:
                 return 1,(InstructionType.ENTRY,(X,Y))
+            if c == "#":
+                return 2, (InstructionType.NOOP, None) # Skip the next character too.
             elif c in "^v<>":
                 return 1,(InstructionType.EXIT, ((X,Y), SYM_TO_DIR[c]))
             elif c == "?":

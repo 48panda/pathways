@@ -55,13 +55,13 @@ All characters:
 ```¬!"£$%^&*()_-+={}[]:;@'~#|\<>,.?/``
 
 Currently in use:
-`!^&*-+~#|<>?/`
+`!^&*-+~|<>?/`
 
 Planned deprecations:
-`#`
+None. All done!
 
 Currently not in use:
-```¬"£$%()_={}[]:;@'\.,``
+```¬"£$%()_={}[]:;@'#\.,``
 
 Planned to implement:
 
