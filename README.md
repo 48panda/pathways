@@ -68,8 +68,6 @@ Currently not in use:
 
 Planned to implement:
 
-`%` for mod arithmetic
-
 `@` for **exciting new feature**
 
 `UNKNOWN` for user input (could also use a letter)
