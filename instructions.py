@@ -76,3 +76,4 @@ def stringify_instr(i: Instruction) -> str:
         return "?" + stringify_instr(i[1])
     if i[0] == InstructionType.STRING:
         return "\"" + i[1].replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+    return str(i)

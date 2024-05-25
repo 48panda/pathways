@@ -84,6 +84,18 @@ class Line:
                     code = []
                     curr_node = mid
                     next_type = EdgeType.FALSE
+                elif inst[0] == InstructionType.ENTRY:
+                    dst = graph.get_arrow_node(self.dir,*inst[1])
+                    graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
+                    code = []
+                    curr_node = dst
+                    next_type = EdgeType.ALWAYS
+                elif inst[0] == InstructionType.COND and inst[1][0] == InstructionType.ENTRY:
+                    dst = graph.get_arrow_node(self.dir,*inst[1][1])
+                    graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
+                    code = []
+                    curr_node = dst
+                    next_type = EdgeType.ALWAYS
                 else:
                     code.append(inst)
             i += 1
