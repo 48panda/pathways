@@ -55,22 +55,29 @@ All characters:
 `` `¬!"£$%^&*()_-+={}[]:;@'~#|\<>,.?/ ``
 
 Currently in use:
+
 `!^&*-+~|<>?/`
 
 Planned deprecations:
+
 None. All done!
 
 Currently not in use:
-```¬"£$%()_={}[]:;@'#\.,``
+
+`` `¬"£$%()_={}[]:;@'#\., ``
 
 Planned to implement:
 
 `%` for mod arithmetic
 
 `@` for **exciting new feature**
+
 `UNKNOWN` for user input (could also use a letter)
+
 `#` for escaping arrows (for 2-directional code) 
+
 `.,` for secondary stack
 
 Planned to not be in use:
-```¬£$()_{}[]:;``
+
+`` `¬£$()_{}[]:; ``
