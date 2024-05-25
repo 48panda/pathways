@@ -15,6 +15,8 @@ class InstructionType(enum.Enum):
     EXIT = 3 # int
     COND = 4 # Instruction
     INTEGER = 5 # int
+    STRING = 6 # String
+    INVALID = 7 # Character of the invalid operation. Only used in testing.
     
     def __str__(self):
         return self.name
@@ -27,10 +29,14 @@ class SimpleInstructionType(enum.Enum):
     SUB = "-"
     MUL = "*"
     DIV = "/"
+    MOD = "%"
     FALSE = "F"
     TRUE = "T"
     PRINT = "!"
     DUPLICATE = "d"
+    EQUAL = "="
+    GREATER = "g"
+    LESS = "l"
     NEGATE = "~"
     N0 = "0"
     N1 = "1"
@@ -66,3 +72,8 @@ def stringify_instr(i: Instruction) -> str:
         return str(i[1])
     if i[0] == InstructionType.INTEGER:
         return f"{'n' if i[1]>0 else 'N'}{abs(i[1])}"
+    if i[0] == InstructionType.COND:
+        return "?" + stringify_instr(i[1])
+    if i[0] == InstructionType.STRING:
+        return "\"" + i[1].replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+    return str(i)

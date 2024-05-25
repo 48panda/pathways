@@ -15,4 +15,3 @@ def preprocess(code: Code) -> Code:
         Code: The same code. Guaranteed to be a reference to the input 'code' parameter.
     """
     return code
-

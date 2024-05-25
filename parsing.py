@@ -84,6 +84,18 @@ class Line:
                     code = []
                     curr_node = mid
                     next_type = EdgeType.FALSE
+                elif inst[0] == InstructionType.ENTRY:
+                    dst = graph.get_arrow_node(self.dir,*inst[1])
+                    graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
+                    code = []
+                    curr_node = dst
+                    next_type = EdgeType.ALWAYS
+                elif inst[0] == InstructionType.COND and inst[1][0] == InstructionType.ENTRY:
+                    dst = graph.get_arrow_node(self.dir,*inst[1][1])
+                    graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
+                    code = []
+                    curr_node = dst
+                    next_type = EdgeType.ALWAYS
                 else:
                     code.append(inst)
             i += 1
@@ -116,6 +128,8 @@ class Line:
                     return 1,(InstructionType.SIMPLE, x)
             if c == self.dir_symbol:
                 return 1,(InstructionType.ENTRY,(X,Y))
+            if c == "#":
+                return 2, (InstructionType.NOOP, None) # Skip the next character too.
             elif c in "^v<>":
                 return 1,(InstructionType.EXIT, ((X,Y), SYM_TO_DIR[c]))
             elif c == "?":
@@ -136,8 +150,25 @@ class Line:
                         c2 = " "
                     di += 1
                 return di-1, (InstructionType.INTEGER, num if c == "n" else -num)
+            elif c == "\"":
+                di = 1
+                s = ""
+                while di + i < len(line) and line[di + i] != "\"":
+                    c = line[di + i]
+                    if c != "\\":
+                        s += c
+                    elif di + i + 1 < len(line):
+                            c2 = line[di + i]
+                            s += {"n":"\n","t":"\t","r":"\r"}.get(c2, c2) # Substitute by escape, fall back on character.
+                            di += 1
+                    di += 1
+                return di + 1, (InstructionType.STRING, s)
+            elif c == "'":
+                if i + 1 < len(line):
+                    return 2, (InstructionType.STRING, line[i + 1])
+                return 1, (InstructionType.STRING, "") # End of program if this happens anyway.
             else:
-                raise ValueError(f"Unknown instruction '{c}'")
+                return 1, (InstructionType.INVALID, c)
     
     def __repr__(self):
         return repr(self.instructions) + "\n"
@@ -179,7 +210,7 @@ class Parser:
             for i, v in self.lines[d].items():
                 for inst in v.instructions:
                     if inst[0] == InstructionType.ENTRY:
-                        graph.add_arrow_node(ASGArrowNode(d, *inst[1]))                    
+                        graph.add_arrow_node(ASGArrowNode(d, *inst[1]))
                     if inst[0] == InstructionType.COND and inst[1][0] == InstructionType.ENTRY:
                         graph.add_arrow_node(ASGArrowNode(d,*inst[1][1]))
 

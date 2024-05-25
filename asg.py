@@ -7,25 +7,54 @@ class ASGNode:
     """A graph node. Represents both direction changes and decision branches.
     """
     def __init__(self) -> None:
-        self.in_edges: List[ASGEdge] = []
-        self.out_edges: List[ASGEdge] = []
+        self.in_edges: List["ASGEdge"] = []
+        self.out_edges: List["ASGEdge"] = []
         self.deg: int = 0
         self.indeg: int = 0
         self.outdeg: int = 0
         self.is_visited: bool = False
         self.outlim: int = 1
+    
+    def remove_edge(self, edge: "ASGEdge") -> None:
+        i = 0
+        while i < len(self.in_edges):
+            if self.in_edges[i] is edge:
+                self.in_edges.pop(i)
+            i += 1
+        i = 0
+        while i < len(self.out_edges):
+            if self.out_edges[i] is edge:
+                self.out_edges.pop(i)
+            i += 1
+        self.update_deg()
+            
 
     def add_in_edge(self, edge: "ASGEdge") -> None:
         self.in_edges.append(edge)
-        self.deg += 1
-        self.indeg += 1
+        self.update_deg()
 
     def add_out_edge(self, edge: "ASGEdge") -> None:
         self.out_edges.append(edge)
-        self.deg += 1
-        self.outdeg += 1
         if self.outdeg > self.outlim:
             raise ValueError("Too many out nodes.")
+        self.update_deg()
+    
+    def update_deg(self) -> None:
+        self.indeg = len(self.in_edges)
+        self.outdeg = len(self.out_edges)
+        self.deg = self.indeg + self.outdeg
+    
+    def visit(self) -> None:
+        if not self.is_visited:
+            self.is_visited = True
+            for edge in self.out_edges:
+                edge.dst.visit()
+    
+    def remove(self, graph: "ASG"):
+        for edge in self.in_edges + self.out_edges:
+            edge.disconnect()
+            graph.remove_edge(edge)
+        graph.remove_node(self)
 
 class ASGTerminalNode(ASGNode):
     def __init__(self):
@@ -78,6 +107,14 @@ class ASGDecisionNode(ASGNode):
                 raise ValueError(f"{self.id()} already has a false node")
             self.false = edge
 
+
+    def remove_edge(self, edge: "ASGEdge") -> None:
+        super().remove_edge(edge)
+        if edge is self.true:
+            self.true = None
+        if edge is self.false:
+            self.false = None
+
     def id(self):
         return f"D{self.name}"
 
@@ -91,6 +128,9 @@ class ASGArrowNode(ASGNode):
         self.y: int = y
         self.group = 0
         self.value = 20
+    
+    def get_key(self):
+        return (self.dir, self.x, self.y)
     
     def id(self):
         return f"{'UDLR'[self.dir.value]}-{self.x}-{self.y}"
@@ -122,6 +162,19 @@ class ASGEdge:
             return "red"
         elif self.type == EdgeType.TRUE:
             return "green"
+    
+    def get_key(self):
+        return self.src.get_key(), self.dst.get_key()
+    
+    def disconnect(self):
+        self.src.remove_edge(self)
+        self.dst.remove_edge(self)
+    
+    def __add__(self, other):
+        if not isinstance(other, ASGEdge):
+            return NotImplemented
+        return ASGEdge(self.src, other.dst, self.code + other.code, self.type)
+        
 
 class ASG:
     def __init__(self) -> None:
@@ -146,13 +199,33 @@ class ASG:
     
     def get_arrow_node(self, dir: Direction, x: int, y: int) -> ASGArrowNode:
         return self.arrow_nodes[(dir, x, y)]
+    
+    def remove_node(self, node: ASGNode):
+        self.nodes.remove(node)
+        if isinstance(node, ASGArrowNode):
+            del self.arrow_nodes[node.get_key()]
+    
+    def remove_edge(self, edge: ASGEdge):
+        self.edges.remove(edge)
+        if isinstance(edge.src, ASGArrowNode) and isinstance(edge.dst, ASGArrowNode):
+            del self.arrow_to_arrow_edges[edge.get_key()]
 
     def show(self, filename: str = "graph.html"):
         from pyvis.network import Network
         net = Network(directed=True)
+        net.add_node("X1", group=0, hidden=True, physics = False)
+        net.add_node("X2", group=1, hidden=True, physics = False)
+        net.add_node("X3", group=2, hidden=True, physics = False)
+        net.add_node("X4", group=3, hidden=True, physics = False)
         for node in self.nodes + [self.terminal, self.start]:
             net.add_node(node.id(), value=node.value, group=node.group)
         for edge in self.edges:
             net.add_edge(*edge.get_pyvis_edge_data(), label=stringify_instrs(edge.code), color=edge.get_color())
         net.set_edge_smooth("dynamic")
         net.show(filename, notebook=False)
+    
+    def set_visited(self, visited: bool = False):
+        """Sets the visited status for all nodes in the graph to the boolean.
+        """
+        for node in self.nodes:
+            node.is_visited = False
