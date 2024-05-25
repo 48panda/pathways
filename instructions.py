@@ -14,25 +14,40 @@ class InstructionType(enum.Enum):
     ENTRY = 2 # int
     EXIT = 3 # int
     COND = 4 # Instruction
+    INTEGER = 5 # int
+    STRING = 6 # String
+    INVALID = 7 # Character of the invalid operation. Only used in testing.
     
     def __str__(self):
         return self.name
     __repr__ = __str__
 
 class SimpleInstructionType(enum.Enum):
-    A = "A"
-    B = "B"
-    C = "C"
-    D = "D"
-    E = "E"
-    F = "F"
-    G = "G"
-    H = "H"
-    I = "I"
-    J = "J"
-    K = "K"
-    L = "L"
     AND = "&"
+    OR = "|"
+    ADD = "+"
+    SUB = "-"
+    MUL = "*"
+    DIV = "/"
+    MOD = "%"
+    FALSE = "F"
+    TRUE = "T"
+    PRINT = "!"
+    DUPLICATE = "d"
+    EQUAL = "="
+    GREATER = "g"
+    LESS = "l"
+    NEGATE = "~"
+    N0 = "0"
+    N1 = "1"
+    N2 = "2"
+    N3 = "3"
+    N4 = "4"
+    N5 = "5"
+    N6 = "6"
+    N7 = "7"
+    N8 = "8"
+    N9 = "9"
     
     def __str__(self):
         return self.value
@@ -55,4 +70,10 @@ def stringify_instrs(instructions: List[Instruction]) -> str:
 def stringify_instr(i: Instruction) -> str:
     if i[0] == InstructionType.SIMPLE:
         return str(i[1])
+    if i[0] == InstructionType.INTEGER:
+        return f"{'n' if i[1]>0 else 'N'}{abs(i[1])}"
+    if i[0] == InstructionType.COND:
+        return "?" + stringify_instr(i[1])
+    if i[0] == InstructionType.STRING:
+        return "\"" + i[1].replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\\", "\\\\").replace("\"", "\\\"") + "\""
     return str(i)

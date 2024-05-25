@@ -58,6 +58,9 @@ class Line:
         curr_node = None
         next_type = None
         code = []
+        if self.index == 0 and self.dir == Direction.RIGHT:
+            curr_node = graph.start
+            next_type = EdgeType.ALWAYS
         while i < len(self.instructions):
             inst = self.instructions[i]
             if curr_node is None and inst[0] != InstructionType.ENTRY:
@@ -100,8 +103,8 @@ class Line:
             graph.add_edge(ASGEdge(curr_node, graph.terminal, code, next_type))
     
     def is_useless(self):
-        # if self.dir == Direction.RIGHT and self.index == 0:
-        #     return False # First never useless
+        if self.dir == Direction.RIGHT and self.index == 0:
+            return False # First never useless
         return not any(map(lambda x: x[0] == InstructionType.ENTRY, self.instructions))
 
     def get_next_instruction(self, line: str, i: int) -> Tuple[int, Instruction]:
@@ -121,10 +124,12 @@ class Line:
                 X = self.index
                 Y = i
             for x in SimpleInstructionType:
-                if c == x.name:
+                if c == x.value:
                     return 1,(InstructionType.SIMPLE, x)
             if c == self.dir_symbol:
                 return 1,(InstructionType.ENTRY,(X,Y))
+            if c == "#":
+                return 2, (InstructionType.NOOP, None) # Skip the next character too.
             elif c in "^v<>":
                 return 1,(InstructionType.EXIT, ((X,Y), SYM_TO_DIR[c]))
             elif c == "?":
@@ -132,8 +137,38 @@ class Line:
                 return di + 1, (InstructionType.COND, inst)
             elif c == " ":
                 return 1,(InstructionType.NOOP, None)
+            elif c in "nN":
+                di = 1
+                c2 = "0"
+                num = 0
+                while c2 in "0123456789":
+                    num *= 10
+                    num += int(c2)
+                    if  i + di < len(line):
+                        c2 = line[i + di]
+                    else:
+                        c2 = " "
+                    di += 1
+                return di-1, (InstructionType.INTEGER, num if c == "n" else -num)
+            elif c == "\"":
+                di = 1
+                s = ""
+                while di + i < len(line) and line[di + i] != "\"":
+                    c = line[di + i]
+                    if c != "\\":
+                        s += c
+                    elif di + i + 1 < len(line):
+                            c2 = line[di + i]
+                            s += {"n":"\n","t":"\t","r":"\r"}.get(c2, c2) # Substitute by escape, fall back on character.
+                            di += 1
+                    di += 1
+                return di + 1, (InstructionType.STRING, s)
+            elif c == "'":
+                if i + 1 < len(line):
+                    return 2, (InstructionType.STRING, line[i + 1])
+                return 1, (InstructionType.STRING, "") # End of program if this happens anyway.
             else:
-                raise ValueError
+                return 1, (InstructionType.INVALID, c)
     
     def __repr__(self):
         return repr(self.instructions) + "\n"
@@ -175,13 +210,9 @@ class Parser:
             for i, v in self.lines[d].items():
                 for inst in v.instructions:
                     if inst[0] == InstructionType.ENTRY:
-                        graph.add_arrow_node(ASGArrowNode(d, *inst[1]))                    
+                        graph.add_arrow_node(ASGArrowNode(d, *inst[1]))
                     if inst[0] == InstructionType.COND and inst[1][0] == InstructionType.ENTRY:
                         graph.add_arrow_node(ASGArrowNode(d,*inst[1][1]))
-
-        
-        pseudostartnode = graph.get_arrow_node(Direction.RIGHT, 0, 0)
-        graph.add_edge(ASGEdge(graph.start, pseudostartnode, []))
 
         for d in Direction:
             for line in self.lines[d].values():
