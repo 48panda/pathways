@@ -17,6 +17,7 @@ class InstructionType(enum.Enum):
     INTEGER = 5 # int
     STRING = 6 # String
     INVALID = 7 # Character of the invalid operation. Only used in testing.
+    POP = 8 # None. Used for a pop with no replacement.
     
     def __str__(self):
         return self.name

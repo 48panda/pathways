@@ -48,6 +48,11 @@ class Line:
                 if inst[1][0] == InstructionType.COND:
                     self.instructions[i] = inst[1]
                     self.instructions.insert(i, (InstructionType.SIMPLE, SimpleInstructionType.AND))
+                if inst[1][0] == InstructionType.NOOP:
+                    self.instructions[i] = (InstructionType.POP, None)
+                if inst[1][0] == InstructionType.ENTRY:
+                    self.instructions[i] = inst[1]
+                    self.instructions.insert(i, (InstructionType.POP, None))
             i += 1
 
     def remove_noop(self):
@@ -86,12 +91,6 @@ class Line:
                     next_type = EdgeType.FALSE
                 elif inst[0] == InstructionType.ENTRY:
                     dst = graph.get_arrow_node(self.dir,*inst[1])
-                    graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
-                    code = []
-                    curr_node = dst
-                    next_type = EdgeType.ALWAYS
-                elif inst[0] == InstructionType.COND and inst[1][0] == InstructionType.ENTRY:
-                    dst = graph.get_arrow_node(self.dir,*inst[1][1])
                     graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
                     code = []
                     curr_node = dst

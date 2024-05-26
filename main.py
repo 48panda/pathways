@@ -5,7 +5,8 @@ from preprocessing import preprocess
 from interpreter import Interpreter
 
 test_code = """\
-n12 5+!
+2?>1!v
+  ^? <
 """
 
 parser = Parser(preprocess(Code(test_code)))

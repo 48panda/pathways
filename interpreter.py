@@ -38,6 +38,8 @@ class Interpreter:
         elif inst[0] == InstructionType.COND:
             if self.pop():
                 self.run_instruction(inst[1])
+        elif inst[0] == InstructionType.POP:
+            self.pop()
         else:
             raise ValueError(f"Unknown instruction type '{inst}'")
     
