@@ -2,9 +2,6 @@ import enum
 from typing import List, Literal, Tuple, Union, TYPE_CHECKING
 from util import Direction
 
-if TYPE_CHECKING:
-    from parsing import Line
-
 class InstructionType(enum.Enum):
     """Each instruction consists of a 2-element tuple, (type, data)
     type is this, data depends on type, listed below.
@@ -18,6 +15,7 @@ class InstructionType(enum.Enum):
     STRING = 6 # String
     INVALID = 7 # Character of the invalid operation. Only used in testing.
     POP = 8 # None. Used for a pop with no replacement.
+    EOL = 9 # None. Marks the end of a line.
     
     def __str__(self):
         return self.name

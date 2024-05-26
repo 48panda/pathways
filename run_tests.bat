@@ -1,1 +1,1 @@
-python -m coverage run -m pytest tests & python -m coverage report
+python -m coverage run -m pytest -x tests & python -m coverage report -m

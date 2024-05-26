@@ -35,10 +35,21 @@ class Line:
         """
         self.instructions: list[Instruction] = []
         i = 0
+        line = "".join(line)
         while i < len(line):
             di, instruction = self.get_next_instruction(line, i)
             i += di
             self.instructions.append(instruction)
+        self.instructions.append((InstructionType.EOL, None))
+        # Parse with strings as instructions and vice versa
+        # Start parsing directly after the first quote to do this.
+        if "\"" in line:
+            i = line.index("\"") + 1
+            while i < len(line):
+                di, instruction = self.get_next_instruction(line, i)
+                i += di
+                self.instructions.append(instruction)
+            self.instructions.append((InstructionType.EOL, None))
     
     def uncompound(self):
         i = 0
@@ -74,29 +85,34 @@ class Line:
             if curr_node is None:
                 curr_node = graph.get_arrow_node(self.dir, *inst[1])
                 next_type = EdgeType.ALWAYS
-            else:
-                if inst[0] == InstructionType.EXIT:
+            elif inst[0] == InstructionType.EXIT:
                     dst = graph.get_arrow_node(inst[1][1],*inst[1][0])
                     graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
                     code = []
                     curr_node = None
                     next_type = None
-                elif inst[0] == InstructionType.COND and inst[1][0] == InstructionType.EXIT:
-                    graph.add_decision_node(mid := ASGDecisionNode())
-                    graph.add_edge(ASGEdge(curr_node, mid, code, next_type))
-                    dst = graph.get_arrow_node(inst[1][1][1],*inst[1][1][0])
-                    graph.add_edge(ASGEdge(mid, dst, [], EdgeType.TRUE))
+            elif inst[0] == InstructionType.COND and inst[1][0] == InstructionType.EXIT:
+                graph.add_decision_node(mid := ASGDecisionNode())
+                graph.add_edge(ASGEdge(curr_node, mid, code, next_type))
+                dst = graph.get_arrow_node(inst[1][1][1],*inst[1][1][0])
+                graph.add_edge(ASGEdge(mid, dst, [], EdgeType.TRUE))
+                code = []
+                curr_node = mid
+                next_type = EdgeType.FALSE
+            elif inst[0] == InstructionType.ENTRY:
+                dst = graph.get_arrow_node(self.dir,*inst[1])
+                graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
+                code = []
+                curr_node = dst
+                next_type = EdgeType.ALWAYS
+            elif inst[0] == InstructionType.EOL:
+                if curr_node is not None:
+                    graph.add_edge(ASGEdge(curr_node, graph.terminal, code, next_type))
+                    curr_node = None
+                    next_type = None
                     code = []
-                    curr_node = mid
-                    next_type = EdgeType.FALSE
-                elif inst[0] == InstructionType.ENTRY:
-                    dst = graph.get_arrow_node(self.dir,*inst[1])
-                    graph.add_edge(ASGEdge(curr_node, dst, code, next_type))
-                    code = []
-                    curr_node = dst
-                    next_type = EdgeType.ALWAYS
-                else:
-                    code.append(inst)
+            else:
+                code.append(inst)
             i += 1
         if curr_node is not None:
             graph.add_edge(ASGEdge(curr_node, graph.terminal, code, next_type))
@@ -161,7 +177,10 @@ class Line:
                             s += {"n":"\n","t":"\t","r":"\r"}.get(c2, c2) # Substitute by escape, fall back on character.
                             di += 1
                     di += 1
-                return di + 1, (InstructionType.STRING, s)
+                if di + i < len(line):
+                    return di + 1, (InstructionType.STRING, s)
+                else:
+                    return di + 1, (InstructionType.NOOP, None)
             elif c == "'":
                 if i + 1 < len(line):
                     return 2, (InstructionType.STRING, line[i + 1])
