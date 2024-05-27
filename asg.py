@@ -212,7 +212,7 @@ class ASG:
 
     def show(self, filename: str = "graph.html"):
         from pyvis.network import Network
-        net = Network(directed=True)
+        net = Network(height="calc(100vh - 20px)", directed=True)
         net.add_node("X1", group=0, hidden=True, physics = False)
         net.add_node("X2", group=1, hidden=True, physics = False)
         net.add_node("X3", group=2, hidden=True, physics = False)
