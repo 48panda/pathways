@@ -1,6 +1,6 @@
 import enum
 from typing import List, Literal, Tuple, Union, TYPE_CHECKING
-from util import Direction
+from util import DIR_TO_SYMBOL, Direction
 
 class InstructionType(enum.Enum):
     """Each instruction consists of a 2-element tuple, (type, data)
@@ -52,13 +52,81 @@ class SimpleInstructionType(enum.Enum):
         return self.value
     __repr__ = __str__
 
+class Instruction:
+    def __init__(self, type: InstructionType, x: int, y: int, dir: Direction):
+        self.x = x
+        self.y = y
+        self.dir = dir
+        self.type = type
+    
+    def __hash__(self):
+        return hash((self.x, self.y, self.dir))
 
-NoOpInstruction = Tuple[Literal[InstructionType.NOOP], Literal[None]]
-SimpleInstruction = Tuple[Literal[InstructionType.SIMPLE], SimpleInstructionType]
-EntryPoint = Tuple[Literal[InstructionType.ENTRY], int]
-ExitPoint = Tuple[Literal[InstructionType.EXIT], Tuple[int, Direction]]
+class SimpleInstruction(Instruction):
+    def __init__(self, simple_type: SimpleInstructionType, x: int, y: int, dir: Direction):
+        super().__init__(InstructionType.SIMPLE, x, y, dir)
+        self.simple_type = simple_type
+    
+    def __str__(self) -> str:
+        return self.simple_type.value
 
-Instruction = Union[NoOpInstruction,SimpleInstruction,EntryPoint,ExitPoint, (Cond:=Tuple[Literal[InstructionType.COND], "Instruction"])]
+class EntryInstruction(Instruction):
+    def __init__(self, x: int, y: int, dir: Direction):
+        super().__init__(InstructionType.ENTRY, x, y, dir)
+    
+    def __str__(self) -> str:
+        return DIR_TO_SYMBOL[self.dir]
+
+class ExitInstruction(Instruction):
+    def __init__(self, exit_dir: Direction, x: int, y: int, dir: Direction):
+        super().__init__(InstructionType.EXIT, x, y, dir)
+        self.exit_dir = exit_dir
+    
+    def __str__(self) -> str:
+        return DIR_TO_SYMBOL[self.exit_dir]
+
+class CondInstruction(Instruction):
+    def __init__(self, inst: Instruction, x: int, y: int, dir: Direction):
+        super().__init__(InstructionType.COND, x, y, dir)
+        self.inst = inst
+    
+    def __str__(self) -> str:
+        return f"{self.inst}"
+
+class IntInstruction(Instruction):
+    def __init__(self, value: int, x: int, y: int, dir: Direction):
+        super().__init__(InstructionType.INTEGER, x, y, dir)
+        self.value = value
+
+    def __str__(self) -> str:
+        return f"{'n' if self.value > 0 else 'N'}{abs(self.value)}"
+
+class StrInstruction(Instruction):
+    def __init__(self, value: str, x: int, y: int, dir:Direction):
+        super().__init__(InstructionType.STRING, x, y, dir)
+        self.value = value
+    
+    def __str__(self):
+        return "\"" + self.value.replace("\n", "\\n").replace("\t", "\\t").replace("\r", "\\r").replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+
+class InvalidInstruction(Instruction):
+    def __init__(self, char: str, x: int, y: int, dir: Direction):
+        super().__init__(InstructionType.INVALID, x, y, dir)
+
+class PopInstruction(Instruction):
+    def __init__(self, x: int, y: int, dir: Direction):
+        super().__init__(InstructionType.POP, x, y, dir)
+
+    def __str__(self) -> str:
+        return "ṗ"
+
+class EOLInstruction(Instruction):
+    def __init__(self, x: int, y: int, dir: Direction):
+        super().__init__(type, x, y, dir)
+    
+    def __str__(self) -> str:
+        return "EOL"
+
 
 def stringify_instrs(instructions: List[Instruction]) -> str:
     out = ""
